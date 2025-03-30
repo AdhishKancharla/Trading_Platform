@@ -41,7 +41,7 @@ class KotakTrader:
 
   """
   def placeOrder(self, exchangeSegment, price, quantity, tradingSymbol, transactionType = "S", product = "NRML", orderType = "L", validity = "DAY",
-                  amoo = "YES", disclosedQuantity = "0", marketProtection = "0", pf = "N", triggerPrice = "0", tag = None):
+                  amoo = "NO", disclosedQuantity = "0", marketProtection = "0", pf = "N", triggerPrice = "0", tag = None):
       try:
         return self.client.place_order(exchange_segment = exchangeSegment, product = product, price = price, order_type = orderType, quantity = quantity,
                                   validity = validity, trading_symbol = tradingSymbol, transaction_type = transactionType, amo = amoo,

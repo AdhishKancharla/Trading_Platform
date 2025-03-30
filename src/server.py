@@ -1,7 +1,5 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import jsonpickle
-from neo_api_client import NeoAPI
 from KotakTrader import KotakTrader
 from UpstoxTrader import UpstoxTrader
 

@@ -31,7 +31,7 @@ class UpstoxTrader:
 
     payload = json.dumps({"quantity": str(quantity), "product": "D", "validity": "DAY", "price": str(price), "tag": "string",
       "instrument_token": instrument_token, "order_type": order_type, "transaction_type": transaction_type, "disclosed_quantity": 0,
-      "trigger_price": trigger_price, "is_amo": True})
+      "trigger_price": trigger_price, "is_amo": False})
     
     headers = {'Authorization': f'Bearer {self.__access_token}', 'Content-Type': 'application/json', 'Accept': 'application/json'}
 

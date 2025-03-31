@@ -10,7 +10,7 @@ const KotakAuthenticate = () => {
     const authenticate = async (e) => {
         e.preventDefault(); // Prevent the default form submission behavior
         try {
-            const response = await axios.post("http://localhost:5000/authenticate",
+            const response = await axios.post("https://super-sincerely-buffalo.ngrok-free.app/authenticate",
                 {
                     name: traderName,
                     otp: otp

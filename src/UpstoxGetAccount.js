@@ -9,7 +9,7 @@ const UpstoxGetAccount = () => {
     const getAccount = async (e) => {
         e.preventDefault(); // Prevent the default form submission behavior
         try {
-            const response = await axios.post("http://localhost:5000/get-account-details",
+            const response = await axios.post("https://super-sincerely-buffalo.ngrok-free.app/get-account-details",
                 {
                     traderType: "upstox",
                     name: traderName

@@ -1,6 +1,6 @@
 import requests
 
-url = "http://localhost:5000/"
+url = "https://super-sincerely-buffalo.ngrok-free.app/"
 data_kotak_init = {
     "name": "padma",
     "traderType": "kotak",
@@ -49,18 +49,18 @@ data_place_order = {
     "orderType": "LIMIT",
     "triggerPrice": 0
 }
-#response = requests.post(url + "add-account", json = data_upstox_init).json()
-#print(response)
-#response = requests.post(url + "get-account-details", json = data_get_upstox_details).json()
-#print(response)
+response = requests.post(url + "add-account", json = data_upstox_init).json()
+print(response)
+response = requests.post(url + "get-account-details", json = data_get_upstox_details).json()
+print(response)
 #response = requests.get(url + "get-positions", json = data_get_upstox_positions).json()
 #print(response)
 
 #response = requests.post(url + "get-all-accounts").json()
 #print(response['accounts'])
 
-response = requests.post(url + "place-order", json = data_place_order).json()
-print(response)
+#response = requests.post(url + "place-order", json = data_place_order).json()
+#print(response)
 
 #response = requests.post(url + "add-account", json = data_kotak_init).json()
 #print(response)

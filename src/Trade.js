@@ -21,7 +21,7 @@ const Trade = () => {
 
   const fetchAccounts = async () => {
     try {
-      const response = await axios.post("http://localhost:5000/get-all-accounts");
+      const response = await axios.post("https://super-sincerely-buffalo.ngrok-free.app/get-all-accounts");
       setAccounts(response.data.accounts);
       console.log("Accounts fetched:", response.data.accounts);
     } catch (error) {

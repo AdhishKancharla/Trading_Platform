@@ -21,7 +21,7 @@ class UpstoxTrader:
     except:
         return "Error in script"
 
-  def placeOrder(self, tradingSymbol, quantity, price, transaction_type, order_type, trigger_price):
+  def placeOrder(self, tradingSymbol, quantity, price, transaction_type, order_type, trigger_price, is_amo):
     fileUrl = "https://assets.upstox.com/market-quote/instruments/exchange/complete.csv.gz"
     symboldf = pd.read_csv(fileUrl)
     symboldf['expiry'] = pd.to_datetime(symboldf['expiry']).apply(lambda x: x.date())
@@ -31,7 +31,7 @@ class UpstoxTrader:
 
     payload = json.dumps({"quantity": str(quantity), "product": "D", "validity": "DAY", "price": str(price), "tag": "string",
       "instrument_token": instrument_token, "order_type": order_type, "transaction_type": transaction_type, "disclosed_quantity": 0,
-      "trigger_price": trigger_price, "is_amo": False})
+      "trigger_price": trigger_price, "is_amo": is_amo})
     
     headers = {'Authorization': f'Bearer {self.__access_token}', 'Content-Type': 'application/json', 'Accept': 'application/json'}
 

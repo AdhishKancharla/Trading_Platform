@@ -10,6 +10,7 @@ const Trade = () => {
   const [transactionType, setTransactionType] = useState("");
   const [orderType, setOrderType] = useState("");
   const [triggerPrice, setTriggerPrice] = useState("");
+  const [afterMarketOrder, setAfterMarketOrder] = useState(false);
   const [message, setMessage] = useState("");
   const [accounts, setAccounts] = useState([]);
   const [selectedAccounts, setSelectedAccounts] = useState([]);
@@ -50,6 +51,7 @@ const Trade = () => {
             transactionType: transactionType,
             orderType: orderType,
             triggerPrice: triggerPrice,
+            amo: afterMarketOrder,
           }
         );
         console.log("Order placed successfully for ", trader.name);
@@ -113,6 +115,19 @@ const Trade = () => {
             <option value = "">Select transaction type</option>
             <option value = "BUY">BUY</option>
             <option value = "SELL">SELL</option>
+          </select>
+        </div>
+        <div>
+          <label className = "block mb-1 font-semibold">After Market Order:</label>
+          <select
+            value = {afterMarketOrder}
+            onChange = {(e) => setAfterMarketOrder(e.target.value)}
+            className="p-2 border rounded w-full"
+            required
+          >
+            <option value = "">Select whether or not this is an after market order: remember to select NO during trading hours</option>
+            <option value = "BUY">YES</option>
+            <option value = "SELL">NO</option>
           </select>
         </div>
         <div>

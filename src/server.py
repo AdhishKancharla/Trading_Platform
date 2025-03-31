@@ -169,6 +169,7 @@ def place_order():
         transaction_type = data.get('transactionType')
         order_type = data.get('orderType')
         trigger_price = str(data.get('triggerPrice'))
+        amo = str(data.get('amo'))
 
         if not name:
             return jsonify({"error": "Name is required"}), 400
@@ -184,6 +185,8 @@ def place_order():
             return jsonify({"error": "Transaction type is required"}), 400
         if not order_type:
             return jsonify({"error": "Order type is required"}), 400
+        if not amo:
+            return jsonify({"error": "AMO is required"}), 400
 
         if order_type == "SL" or order_type == "SL-M":
             if not trigger_price:
@@ -197,6 +200,8 @@ def place_order():
         if trader_kotak:
             if order_type == "LIMIT":
                 order_type = "L"
+            elif order_type == "MARKET":
+                order_type = "MKT"
             if transaction_type == "BUY":
                 transaction_type = "B"
             elif transaction_type == "SELL":
@@ -205,13 +210,17 @@ def place_order():
                 return jsonify({"error": "Invalid transaction type"}), 400
             
             if trader_kotak.placeOrder(exchangeSegment = exchangeSegment, price = price, quantity = quantity, tradingSymbol = tradingsymbol,
-                                       transactionType = transaction_type, orderType = order_type, triggerPrice = trigger_price):
+                                       transactionType = transaction_type, orderType = order_type, triggerPrice = trigger_price, amo = amo):
                 return jsonify({"message": "Order placed successfully"}), 200
             else:
                 return jsonify({"error": "Failed to place kotak order"}), 500
         
         if trader_upstox:
-            if trader_upstox.placeOrder(tradingsymbol, quantity, price, transaction_type, order_type, trigger_price):
+            if amo == "YES":
+                is_amo = True
+            else:
+                is_amo = False
+            if trader_upstox.placeOrder(tradingsymbol, quantity, price, transaction_type, order_type, trigger_price, is_amo):
                 return jsonify({"message": "Order placed successfully"}), 200
             else:
                 return jsonify({"error": "Failed to place upstox order"}), 500

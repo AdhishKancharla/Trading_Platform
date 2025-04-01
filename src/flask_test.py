@@ -40,19 +40,20 @@ data_get_upstox_positions = {
     "traderType": "upstox"
 }
 data_place_order = {
-    "name": "prasad",
-    "exchangeSegment": "NSE",
-    "tradingsymbol": "NIFTY2540323500PE",
-    "quantity": 75,
-    "price": 100,
+    "name": "padma_kotak",
+    "exchangeSegment": "BSE",
+    "tradingsymbol": "SENSEX2540879000CE",
+    "quantity": 20,
+    "price": 48,
     "transactionType": "SELL",
     "orderType": "LIMIT",
-    "triggerPrice": 0
+    "triggerPrice": 0,
+    "amo": "NO"
 }
-response = requests.post(url + "add-account", json = data_upstox_init).json()
-print(response)
-response = requests.post(url + "get-account-details", json = data_get_upstox_details).json()
-print(response)
+#response = requests.post(url + "add-account", json = data_upstox_init).json()
+#print(response)
+#response = requests.post(url + "get-account-details", json = data_get_upstox_details).json()
+#print(response)
 #response = requests.get(url + "get-positions", json = data_get_upstox_positions).json()
 #print(response)
 
@@ -73,5 +74,5 @@ print(response)
 #response = requests.get(url + "get-positions", json = data_get_kotak_positions).json()
 #print(response)
 #data_place_order['name'] = "padma"
-#response = requests.post(url + "place-order", json = data_place_order).json()
-#print(response)
+response = requests.post(url + "place-order", json = data_place_order).json()
+print(response)

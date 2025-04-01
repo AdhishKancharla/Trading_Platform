@@ -198,6 +198,10 @@ def place_order():
         trader_upstox = getTrader(name, "upstox")
         
         if trader_kotak:
+            if exchangeSegment == "BSE":
+                exchangeSegment = "bse_fo"
+            elif exchangeSegment == "NSE":
+                exchangeSegment = "nse_fo"
             if order_type == "LIMIT":
                 order_type = "L"
             elif order_type == "MARKET":
@@ -210,7 +214,7 @@ def place_order():
                 return jsonify({"error": "Invalid transaction type"}), 400
             
             if trader_kotak.placeOrder(exchangeSegment = exchangeSegment, price = price, quantity = quantity, tradingSymbol = tradingsymbol,
-                                       transactionType = transaction_type, orderType = order_type, triggerPrice = trigger_price, amo = amo):
+                                       transactionType = transaction_type, orderType = order_type, triggerPrice = trigger_price, amoo = amo):
                 return jsonify({"message": "Order placed successfully"}), 200
             else:
                 return jsonify({"error": "Failed to place kotak order"}), 500

@@ -218,6 +218,7 @@ def place_order():
             try:
                 message = trader_kotak.placeOrder(exchangeSegment = exchangeSegment, price = price, quantity = quantity, tradingSymbol = tradingsymbol, 
                                                   transactionType = transaction_type, orderType = order_type, triggerPrice = trigger_price, amo = amo)
+                print("Message from kotak: ", message)
                 if message['stCode'] == 200:
                     return jsonify({"message": "Order placed successfully"}), 200
                 else:

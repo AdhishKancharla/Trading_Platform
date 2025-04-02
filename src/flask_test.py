@@ -21,7 +21,7 @@ data_kotak_login = {
 data_kotak_authenticate = {
     "name": "padma",
     "traderType": "kotak",
-    "otp": "7047"
+    "otp": "4636"
 }
 data_get_kotak_details = {
     "name": "padma",
@@ -41,14 +41,14 @@ data_get_upstox_positions = {
 }
 data_place_order = {
     "name": "padma",
-    "exchangeSegment": "BSE",
-    "tradingsymbol": "SENSEX2540879000CE",
-    "quantity": 20,
+    "exchangeSegment": "NSE",
+    "tradingsymbol": "NIFTY2540323100CE",
+    "quantity": 75,
     "price": 1,
     "transactionType": "BUY",
     "orderType": "LIMIT",
     "triggerPrice": 0,
-    "amo": "NO"
+    "amo": "YES"
 }
 #response = requests.post(url + "add-account", json = data_upstox_init).json()
 #print(response)
@@ -74,5 +74,5 @@ data_place_order = {
 #response = requests.post(url + "get-positions", json = data_get_kotak_positions).json()
 #print(response)
 #data_place_order['name'] = "padma"
-response = requests.post(url + "place-order", json = data_place_order).json()
-print(response)
+#response = requests.post(url + "place-order", json = data_place_order).json()
+#print(response)

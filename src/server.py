@@ -213,11 +213,17 @@ def place_order():
             else:
                 return jsonify({"error": "Invalid transaction type"}), 400
             
-            if trader_kotak.placeOrder(exchangeSegment = exchangeSegment, price = price, quantity = quantity, tradingSymbol = tradingsymbol,
-                                       transactionType = transaction_type, orderType = order_type, triggerPrice = trigger_price, amoo = amo):
-                return jsonify({"message": "Order placed successfully"}), 200
-            else:
-                return jsonify({"error": "Failed to place kotak order"}), 500
+            print("Trying to place order")
+
+            try:
+                message = trader_kotak.placeOrder(exchangeSegment = exchangeSegment, price = price, quantity = quantity, tradingSymbol = tradingsymbol, 
+                                                  transactionType = transaction_type, orderType = order_type, triggerPrice = trigger_price, amo = amo)
+                if message['stCode'] == 200:
+                    return jsonify({"message": "Order placed successfully"}), 200
+                else:
+                    return jsonify({"error": "Failed to place kotak order"}), 500
+            except Exception as e:
+                return jsonify({"error": "Exception while placing kotak order"}), 500
         
         if trader_upstox:
             if amo == "YES":

@@ -40,8 +40,21 @@ const Trade = () => {
     e.preventDefault();
     for (const trader of selectedAccounts) {
       try{
+        if (!(orderType === "SL" || orderType === "SL-M")){
+          setTriggerPrice("0");
+        }
         console.log("Placing order for ", trader.name);
-        await axios.post("http://localhost:5000/place-order", 
+        console.log("Trader Type: ", trader.traderType);
+        console.log("Exchange Segment: ", exchangeSegment);
+        console.log("Trading Symbol: ", tradingsymbol);
+        console.log("Quantity: ", quantity);
+        console.log("Price: ", price);
+        console.log("Transaction Type: ", transactionType);
+        console.log("Order Type: ", orderType);
+        console.log("Trigger Price: ", triggerPrice);
+        console.log("After Market Order: ", afterMarketOrder);
+        console.log("Trader Name: ", trader.name);
+        await axios.post("https://super-sincerely-buffalo.ngrok-free.app/place-order", 
           {
             name: trader.name,
             exchangeSegment: exchangeSegment,
@@ -126,8 +139,8 @@ const Trade = () => {
             required
           >
             <option value = "">Select whether or not this is an after market order: remember to select NO during trading hours</option>
-            <option value = "BUY">YES</option>
-            <option value = "SELL">NO</option>
+            <option value = "YES">YES</option>
+            <option value = "NO">NO</option>
           </select>
         </div>
         <div>

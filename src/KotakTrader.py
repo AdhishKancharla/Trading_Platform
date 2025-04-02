@@ -7,9 +7,6 @@ class KotakTrader:
 
   def __init__(self, name, consumer_key, secret_key, neo_fin_key):
     self.name = name
-    self.__consumer_key = consumer_key
-    self.__secret_key = secret_key
-    self.__neo_fin_key = neo_fin_key
     self.client = NeoAPI(consumer_key = consumer_key, consumer_secret = secret_key, environment = 'prod',
                 access_token = None, neo_fin_key = neo_fin_key)
 
@@ -41,13 +38,13 @@ class KotakTrader:
 
   """
   def placeOrder(self, exchangeSegment, price, quantity, tradingSymbol, transactionType = "S", product = "NRML", orderType = "L", validity = "DAY",
-                  amoo = "NO", disclosedQuantity = "0", marketProtection = "0", pf = "N", triggerPrice = "0", tag = None):
+                  amo = "NO", disclosedQuantity = "0", marketProtection = "0", pf = "N", triggerPrice = "0", tag = None):
       try:
         return self.client.place_order(exchange_segment = exchangeSegment, product = product, price = price, order_type = orderType, quantity = quantity,
-                                  validity = validity, trading_symbol = tradingSymbol, transaction_type = transactionType, amo = amoo,
+                                  validity = validity, trading_symbol = tradingSymbol, transaction_type = transactionType, amo = amo,
                                   disclosed_quantity = disclosedQuantity, market_protection = marketProtection, pf = pf, trigger_price = triggerPrice, tag = tag)
       except Exception as e:
-        print("Exception when placing order: ", e)
+        return "Exception when modifying order: "+ str(e)
 
   """
   Place a stop loss order
@@ -62,7 +59,7 @@ class KotakTrader:
                                 validity = validity, trading_symbol = tradingSymbol, transaction_type = transactionType, amo = amoo,
                                 disclosed_quantity = disclosedQuantity, market_protection = marketProtection, pf = pf, trigger_price = triggerPrice, tag = tag)
     except Exception as e:
-      print("Exception when placing order: ", e)
+      return "Exception when modifying order: "+ str(e)
 
   """
   Cancels an order
@@ -74,7 +71,7 @@ class KotakTrader:
     try:
       return self.client.cancel_order(order_id, is_verify = isVerify)
     except Exception as e:
-      print("Exception when cancelling order: ", e)
+      return "Exception when modifying order: "+ str(e)
 
   """
   Modifies an order
@@ -89,7 +86,7 @@ class KotakTrader:
                                  order_type = orderType, quantity = quantity, validity = validity, trading_symbol = tradingSymbol, transaction_type = transactionType,
                                  order_id = orderId, trigger_price = triggerPrice, filled_quantity = filledQuantity, market_protection = marketProtection, dd = dd)
     except Exception as e:
-      print("Exception when modifying order: ", e)
+      return "Exception when modifying order: "+ str(e)
 
   def getOrderReport(self):
     return self.client.order_report()

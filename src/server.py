@@ -163,7 +163,13 @@ def place_order():
 
         name = data.get('name')
         exchangeSegment = data.get('exchangeSegment')
-        tradingsymbol = data.get('tradingsymbol')
+        index = data.get('index')
+        strike = data.get('strike')
+        option = data.get('option')
+        expiry = data.get('expiry')
+
+        tradingsymbol = index + expiry + strike + option
+        
         quantity = str(data.get('quantity'))
         price = str(data.get('price'))
         transaction_type = data.get('transactionType')
@@ -175,8 +181,14 @@ def place_order():
             return jsonify({"error": "Name is required"}), 400
         if not exchangeSegment:
             return jsonify({"error": "Exchange segment is required"}), 400
-        if not tradingsymbol:
-            return jsonify({"error": "Tradingsymbol is required"}), 400
+        if not index:
+            return jsonify({"error": "Index is required"}), 400
+        if not strike:
+            return jsonify({"error": "Strike is required"}), 400
+        if not option:
+            return jsonify({"error": "Option is required"}), 400
+        if not expiry:
+            return jsonify({"error": "Expiry is required"}), 400
         if not quantity:
             return jsonify({"error": "Quantity is required"}), 400
         if not price:

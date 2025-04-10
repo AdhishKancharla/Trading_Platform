@@ -3,7 +3,10 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 
 const Trade = () => {
-  const [tradingsymbol, setTradingsymbol] = useState("");
+  const [index, setIndex] = useState("");
+  const [strike, setStrike] = useState("");
+  const [expiry, setExpiry] = useState("");
+  const [option, setOption] = useState("");
   const [exchangeSegment, setExchangeSegment] = useState("");
   const [quantity, setQuantity] = useState("");
   const [price, setPrice] = useState("");
@@ -46,7 +49,10 @@ const Trade = () => {
         console.log("Placing order for ", trader.name);
         console.log("Trader Type: ", trader.traderType);
         console.log("Exchange Segment: ", exchangeSegment);
-        console.log("Trading Symbol: ", tradingsymbol);
+        console.log("Index: ", index);
+        console.log("Option: ", option);
+        console.log("Strike Price: ", strike);
+        console.log("Expiry Date: ", expiry);
         console.log("Quantity: ", quantity);
         console.log("Price: ", price);
         console.log("Transaction Type: ", transactionType);
@@ -58,7 +64,10 @@ const Trade = () => {
           {
             name: trader.name,
             exchangeSegment: exchangeSegment,
-            tradingsymbol: tradingsymbol,
+            index: index,
+            option: option,
+            strike: strike,
+            expiry: expiry,
             quantity: quantity,
             price: price,
             transactionType: transactionType,
@@ -84,16 +93,89 @@ const Trade = () => {
 
       <form onSubmit = {handleTradeSubmit} className="space-y-4">
         <div>
-          <label className = "block mb-1 font-semibold">Trading Symbol:</label>
-          <input
-            type = "text"
-            value = {tradingsymbol}
-            onChange = {(e) => setTradingsymbol(e.target.value)}
+          <label className = "block mb-1 font-semibold">Index:</label>
+          <select
+            value = {index}
+            onChange = {(e) => setIndex(e.target.value)}
             className = "p-2 border rounded w-full"
-            placeholder = "Enter trading symbol"
+            required
+          >
+            <option value = "">Select index</option>
+            <option value = "NIFTY">Nifty</option>
+            <option value = "BANKNIFTY">Banknifty</option>
+            <option value = "SENSEX">Sensex</option>
+          </select>
+        </div>
+        <div>
+          <label className = "block mb-1 font-semibold">Strike Price:</label>
+          <input
+            type = "number"
+            value = {strike}
+            onChange = {(e) => setStrike(e.target.value)}
+            className = "p-2 border rounded w-full"
+            placeholder = "Enter strike price"
             required
           />
         </div>
+        <div>
+          <label className = "block mb-1 font-semibold">Option:</label>
+          <select
+            value = {option}
+            onChange = {(e) => setOption(e.target.value)}
+            className = "p-2 border rounded w-full"
+            required
+          >
+            <option value = "">Select option</option>
+            <option value = "CE">Call Option</option>
+            <option value = "PE">Put Option</option>
+          </select>
+        </div>
+        {index === "NIFTY" && (
+          <div>
+            <label className = "block mb-1 font-semibold">Expiry Date:</label>
+            <select
+              value = {expiry}
+              onChange = {(e) => setExpiry(e.target.value)}
+              className = "p-2 border rounded w-full"
+              required
+            >
+              <option value = "">Select expiry date</option>
+              <option value = "25417">17th April</option>
+              <option value = "25APR">24th April</option>
+              <option value = "25430">30th April</option>
+            </select>
+          </div>
+        )}
+        {index === "BANKNIFTY" && (
+            <div>
+              <label className = "block mb-1 font-semibold">Expiry Date:</label>
+              <select
+                value = {expiry}
+                onChange = {(e) => setExpiry(e.target.value)}
+                className = "p-2 border rounded w-full"
+                required
+              >
+                <option value = "">Select expiry date</option>
+                <option value = "25APR">24th April</option>
+              </select>
+            </div>
+          )}
+        {index === "SENSEX" && (
+            <div>
+              <label className = "block mb-1 font-semibold">Expiry Date:</label>
+              <select
+                value = {expiry}
+                onChange = {(e) => setExpiry(e.target.value)}
+                className = "p-2 border rounded w-full"
+                required
+              >
+                <option value = "">Select expiry date</option>
+                <option value = "25415">15th April</option>
+                <option value = "25422">22nd April</option>
+                <option value = "25APR">29th April</option>
+              </select>
+            </div>
+          )}
         <div>
           <label className = "block mb-1 font-semibold">Quantity:</label>
           <input
@@ -165,9 +247,10 @@ const Trade = () => {
             required
           >
             <option value = "">Select order type</option>
-            <option value = "LIMIT">LIMIT</option>
-            <option value = "SL">SL</option>
-            <option value = "SL-M">SL-M</option>
+            <option value = "LIMIT">Limit</option>
+            <option value = "MARKET">Market</option>
+            <option value = "SL">Stop Loss Limit</option>
+            <option value = "SL-M">Stop Loss Market</option>
           </select>
         </div>
         {(orderType === "SL" || orderType === "SL-M") && (

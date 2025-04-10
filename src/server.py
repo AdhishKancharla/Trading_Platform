@@ -239,6 +239,10 @@ def place_order():
                 return jsonify({"error": "Exception while placing kotak order"}), 500
         
         if trader_upstox:
+            if transaction_type == "B" or transaction_type == "BUY":
+                transaction_type = "BUY"
+            else:
+                transaction_type = "SELL"
             if amo == "YES":
                 is_amo = True
             else:
@@ -248,6 +252,177 @@ def place_order():
             else:
                 return jsonify({"error": "Failed to place upstox order"}), 500
         return jsonify({"error": "Trader not found"}), 404
+    except Exception as e:
+        return jsonify({"Invalid order placing": str(e)}), 500
+@app.route("/modify-order", methods = ["POST"])
+def modify_order():
+    try:
+        data = request.get_json(silent = True)
+        name = data.get('name')
+        order_id = data.get('orderId')
+        new_price = str(data.get('newPrice'))
+        new_quantity = str(data.get('newQuantity'))
+        transaction_type = data.get('transactionType')
+        order_type = data.get('orderType')
+        trigger_price = data.get('triggerPrice')
+
+        if not name:
+            return jsonify({"error": "Name is required"}), 400
+        if not order_id:
+            return jsonify({"error": "Order ID is required"}), 400
+        if not new_price:
+            return jsonify({"error": "New price is required"}), 400
+        if not new_quantity:
+            return jsonify({"error": "New quantity is required"}), 400
+        if not transaction_type:
+            return jsonify({"error": "Transaction type is required"}), 400
+        if not order_type:
+            return jsonify({"error": "Order type is required"}), 400
+        if order_type == "SL" or order_type == "SL-M":
+            if not trigger_price:
+                return jsonify({"error": "Trigger price is required for SL and SL-M order types"}), 400
+        else:
+            trigger_price = "0"
+
+        trader_kotak = getTrader(name, "kotak")
+
+        if trader_kotak:
+            print("Trying to modify order")
+            try:
+                message = trader_kotak.client.modify_order(quantity = new_quantity, price = new_price, order_id = order_id, 
+                                                           order_type = order_type, transaction_type = transaction_type, validity = "DAY", trigger_price = trigger_price)
+                print("Message from kotak: ", message)
+                if message['stCode'] == 200:
+                    return jsonify({"message": "Order modified successfully"}), 200
+                else:
+                    return jsonify({"error": "Failed to modify kotak order"}), 500
+            except Exception as e:
+                return jsonify({"error": "Exception while modifying kotak order"}), 500
+        else:
+            return jsonify({"error": "Kotak Trader not found"}), 404
+    except Exception as e:
+        return jsonify({"Invalid order modifying": str(e)}), 500
+@app.route("/cancel-order", methods = ["POST"])
+def cancel_order():
+    try:
+        data = request.get_json(silent = True)
+        name = data.get('name')
+        order_id = data.get('orderId')
+
+        if not name:
+            return jsonify({"error": "Name is required"}), 400
+        if not order_id:
+            return jsonify({"error": "Order ID is required"}), 400
+
+        trader_kotak = getTrader(name, "kotak")
+        
+        if trader_kotak:
+            if trader_kotak.client.cancel_order(order_id = order_id):
+                return jsonify({"message": "Order cancelled successfully"}), 200
+            else:
+                return jsonify({"error": "Failed to cancel order"}), 500
+        else:
+            return jsonify({"error": "Kotak Trader not found"}), 404
+    except Exception as e:
+        return jsonify({"Invalid order cancelling": str(e)}), 500
+@app.route("/get-open-orders", methods = ["POST"])
+def get_open_orders():
+    try:
+        data = request.get_json(silent = True)
+        name = data.get('name')
+        trader = getTrader(name, "kotak")
+        if trader:
+            orders = trader.getOpenOrders()
+            return jsonify(orders), 200
+        else:
+            return jsonify({"error": "Kotak Account not found"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+@app.route("/post-ironfly", methods = ["POST"])
+def ironfly():
+    try:
+        data = request.get_json(silent = True)
+        name = data.get('name')
+        index = data.get('index')
+        expiry = data.get('expiry')
+        strike = data.get('strike')
+        away = data.get('away')
+        quantity = str(data.get('quantity'))
+        amo = str(data.get('amo'))
+        enter = data.get('enter')
+
+        if not name:
+            return jsonify({"error": "Name is required"}), 400
+        if not index:
+            return jsonify({"error": "Index is required"}), 400
+        if not expiry:
+            return jsonify({"error": "Expiry is required"}), 400
+        if not strike:
+            return jsonify({"error": "Strike is required"}), 400
+        if not away:
+            return jsonify({"error": "Away is required"}), 400
+        if not amo:
+            return jsonify({"error": "AMO is required"}), 400
+        if not quantity:
+            return jsonify({"error": "Quantity is required"}), 400
+        if not enter:
+            return jsonify({"error": "Enter is required"}), 400
+
+        trader_kotak = getTrader(name, "kotak")
+        
+        if trader_kotak:
+            exchangeSegment = "nse_fo"
+            
+            if index == "SENSEX":
+                exchangeSegment = "bse_fo"
+            transactionType = "B"
+            
+            if enter == "YES":
+                transactionType = "S"
+            
+            trader_kotak.placeOrder(exchangeSegment = exchangeSegment, price = "0", quantity = quantity, tradingSymbol = index + expiry + strike + "PE",
+                                    transactionType = transactionType, orderType = "MKT", amo = amo)
+            
+            trader_kotak.placeOrder(exchangeSegment = exchangeSegment, price = "0", quantity = quantity, tradingSymbol = index + expiry + strike + "CE",
+                                    transactionType = transactionType, orderType = "MKT", amo = amo)
+            
+            if transactionType == "B":
+                transactionType = "S"
+            else:
+                transactionType = "B"
+            
+            trader_kotak.placeOrder(exchangeSegment = exchangeSegment, price = "0", quantity = quantity, 
+                                    tradingSymbol = index + expiry + str(int(strike) - int(away)) + "PE", transactionType = transactionType,
+                                      orderType = "MKT", amo = amo)
+
+            trader_kotak.placeOrder(exchangeSegment = exchangeSegment, price = "0", quantity = quantity, 
+                                    tradingSymbol = index + expiry + str(int(strike) + int(away)) + "CE", transactionType = transactionType,
+                                      orderType = "MKT", amo = amo)
+
+        trader_upstox = getTrader(name, "upstox")
+
+        if trader_upstox:
+            transactionType = "BUY"
+            if enter == "YES":
+                transactionType = "SELL"
+            
+            trader_upstox.placeOrder(index + expiry + strike + "PE", quantity, "0", transactionType, "MKT", "0", is_amo = amo)
+            trader_upstox.placeOrder(index + expiry + strike + "CE", quantity, "0", transactionType, "MKT", "0", is_amo = amo)
+            
+            if transactionType == "BUY":
+                transactionType = "SELL"
+            else:
+                transactionType = "BUY"
+
+            is_amo = True
+            if amo == "NO":
+                is_amo = False
+            
+            trader_upstox.placeOrder(index + expiry + str(int(strike) - int(away)) + "PE", quantity, "0", transactionType, "MKT", "0", is_amo = is_amo)
+            trader_upstox.placeOrder(index + expiry + str(int(strike) + int(away)) + "CE", quantity, "0", transactionType, "MKT", "0", is_amo = is_amo)
+
+        return jsonify({"message": "Ironfly placed successfully"}), 200
+        
     except Exception as e:
         return jsonify({"Invalid order placing": str(e)}), 500
 

@@ -9,20 +9,23 @@ import KotakGetAccount from './KotakGetAccount';
 import UpstoxAdd from './UpstoxAddAccount'
 import UpstoxGetAccount from "./UpstoxGetAccount";
 import UpstoxPositions from "./UpstoxPositions";
+import ModifyOrder from "./ModifyOrder";
 
 const App = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/upstoxAdd" element={<UpstoxAdd />} />
-        <Route path="/kotakAdd" element={<KotakAdd />} />
-        <Route path="/kotakLogin" element={<KotakLogin />} />
-        <Route path="/kotakAuthenticate" element={<KotakAuthenticate />} />
-        <Route path="/kotakGet" element={<KotakGetAccount />} />
-        <Route path="/upstoxGet" element={<UpstoxGetAccount />} />
-        <Route path="/upstoxPositions" element={<UpstoxPositions />} />
-        <Route path="/trade" element={<Trade />} />
+        <Route path = "/" element={<Home />} />
+        <Route path = "/upstoxAdd" element={<UpstoxAdd />} />
+        <Route path = "/kotakAdd" element={<KotakAdd />} />
+        <Route path = "/kotakLogin" element={<KotakLogin />} />
+        <Route path = "/kotakAuthenticate" element={<KotakAuthenticate />} />
+        <Route path = "/kotakGet" element={<KotakGetAccount />} />
+        <Route path = "/upstoxGet" element={<UpstoxGetAccount />} />
+        <Route path = "/upstoxPositions" element={<UpstoxPositions />} />
+        <Route path = "/trade" element={<Trade />} />
+        <Route path = "/modifyOrder" element={<ModifyOrder />} />.
+        <Route path = "/cancelOrder" element={<ModifyOrder />} />
       </Routes>
     </Router>
   );

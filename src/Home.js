@@ -16,6 +16,8 @@ const Home = () => {
         <Link to = "/upstoxGet" className = "block p-2 bg-green-500 text-white rounded w-64 text-center mb-2">Get Upstox Account</Link>
         <Link to = "/upstoxPositions" className = "block p-2 bg-red-500 text-white rounded w-64 text-center">View Upstox Positions</Link>
         <Link to = "/trade" className = "block p-2 bg-red-500 text-white rounded w-64 text-center">Go to Trade Page</Link>
+        <Link to = "/modifyOrder" className = "block p-2 bg-red-500 text-white rounded w-64 text-center">Modify Order</Link>
+        <Link to = "/cancelOrder" className = "block p-2 bg-red-500 text-white rounded w-64 text-center">Cancel Order</Link>
       </div>
     </div>
   );

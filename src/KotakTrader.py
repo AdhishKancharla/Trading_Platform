@@ -47,6 +47,20 @@ class KotakTrader:
         return "Exception when modifying order: "+ str(e)
 
   """
+  Places the order on each of the trader objects
+  Parameters: List of trader objects and all the placeOrder parameters
+  Return: List of JSON objects of the orders placed
+  """
+
+  def placeOrders(traders, exchangeSegment, price, quantity, tradingSymbol, transactionType = "S", product = "NRML", orderType = "L", validity = "DAY",
+                 amoo = "NO", disclosedQuantity = "0", marketProtection = "0", pf = "N", triggerPrice = "0", tag = None):
+    orders = []
+    for trader in traders:
+      orders.append(trader.placeOrder(exchangeSegment, price, quantity, tradingSymbol, transactionType, product, orderType,
+                                      validity, amoo, disclosedQuantity, marketProtection, pf, triggerPrice, tag))
+    return orders
+
+  """
   Place a stop loss order
   """
 

@@ -1,86 +1,104 @@
-import React, { useState } from "react";
-import axios from "axios";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 const UpstoxPositions = () => {
-  const [traderName, setTraderName] = useState("");
-  const [positions, setPositions] = useState([]); // Ensure initial state is an empty array
-  const [error, setError] = useState("");
+  const [accounts, setAccounts] = useState([]);
+  const [selectedAccount, setSelectedAccount] = useState('');
+  const [positions, setPositions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const getPositions = async(e) => {
-    e.preventDefault(); // Prevent the default form submission behavior
-    try {
-      const response = await axios.post("https://super-sincerely-buffalo.ngrok-free.app/get-positions", 
-        {
-          traderType: "upstox",
-          name: traderName
+  // Fetch all Upstox accounts
+  useEffect(() => {
+    const fetchAccounts = async () => {
+      try {
+        const res = await axios.post('/get-all-accounts', {});
+        const upstoxAccounts = res.data.accounts.filter(a => a.traderType === 'upstox');
+        setAccounts(upstoxAccounts);
+        if (upstoxAccounts.length) {
+          setSelectedAccount(upstoxAccounts[0].name);
         }
-      );
-      console.log(response)
-      setPositions(response.data);
-    } catch (error) {
-      setError("Please try again using an access token");
-      console.error("Error fetching positions:", error);
-    }
-  }
+      } catch (err) {
+        setError('Failed to load accounts.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAccounts();
+  }, []);
+
+  // Fetch positions using original POST logic when trader changes
+  useEffect(() => {
+    if (!selectedAccount) return;
+    setLoading(true);
+    setError('');
+    axios.post('/get-positions', { traderType: 'upstox', name: selectedAccount })
+      .then(res => {
+        setPositions(res.data);
+      })
+      .catch(() => {
+        setError('Failed to load positions.');
+        setPositions([]);
+      })
+      .finally(() => setLoading(false));
+  }, [selectedAccount]);
 
   return (
-    <div className = "p-4 border rounded-lg shadow-md bg-white">
-      <h2 className = "text-xl font-bold mb-4">Enter Upstox Account Name</h2>
-      <form onSubmit = {getPositions} className = "mb-4">
-        <input
-          type = "text"
-          value = {traderName}
-          onChange = {(e) => setTraderName(e.target.value)}
-          placeholder = "Enter the trader name"
-          className="block p-2 border rounded w-64 mb-2"
-          required
-        />
-        <button type = "submit" className="p-2 bg-blue-500 text-white rounded">Get Positions</button>
-      </form>
+    <div className="p-6 max-w-5xl mx-auto bg-white rounded-2xl shadow-lg">
+      <h2 className="text-2xl font-bold mb-4">Upstox Positions</h2>
+      {error && <p className="text-red-600 mb-4">{error}</p>}
 
-      <h2 className = "text-xl font-semibold mb-4 text-gray-800">Existing Positions</h2>
-
-      <div className = "mb-4">
-        <Link
-          to = "/"
-          className = "text-blue-500 hover:underline text-sm"
+      <div className="mb-4">
+        <label className="block text-gray-700 mb-2">Select Trader:</label>
+        <select
+          value={selectedAccount}
+          onChange={e => setSelectedAccount(e.target.value)}
+          className="block w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          &larr; Go Back to Home Page
-        </Link>
-      </div>      
+          {accounts.map(acc => (
+            <option key={acc.name} value={acc.name}>
+              {acc.name}
+            </option>
+          ))}
+        </select>
+      </div>
 
-      {error && <p className="text-red-500 font-medium">{error}</p>}
-
-      {positions.length > 0 ? (
-        <table className = "min-w-full table-auto border-collapse border border-gray-300">
-          <thead>
-            <tr className = "bg-gray-100 border-b border-gray-300">
-              <th className = "p-2 text-left text-sm font-semibold text-gray-700 border-r border-gray-300">Symbol</th>
-              <th className = "p-2 text-left text-sm font-semibold text-gray-700 border-r border-gray-300">Quantity</th>
-              <th className = "p-2 text-left text-sm font-semibold text-gray-700 border-r border-gray-300">Average Price</th>
-              <th className = "p-2 text-left text-sm font-semibold text-gray-700 border-r border-gray-300">Current Price</th>
-              <th className = "p-2 text-left text-sm font-semibold text-gray-700 border-r border-gray-300">Instrument Token</th>
-            </tr>
-          </thead>
-          <tbody>
-            {positions.map((pos, index) => (
-              <tr
-                key = {index}
-                className = {`text-sm ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'} border-b border-gray-300`}
-              >
-                <td className = "p-2 border-r border-gray-300">{pos.tradingsymbol}</td>
-                <td className = "p-2 border-r border-gray-300">{pos.quantity}</td>
-                <td className = "p-2 border-r border-gray-300">₹{pos.average_price}</td>
-                <td className = "p-2 border-r border-gray-300">₹{pos.last_price}</td>
-                <td className = "p-2 border-r border-gray-300">{pos.instrument_token}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {loading ? (
+        <p className="text-gray-600">Loading positions...</p>
       ) : (
-        <p className="text-gray-600">No existing positions</p>
+        positions.length > 0 ? (
+          <table className="w-full table-auto divide-y divide-gray-200">
+            <thead>
+              <tr>
+                <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Symbol</th>
+                <th className="px-4 py-2 text-right text-sm font-medium text-gray-700">Quantity</th>
+                <th className="px-4 py-2 text-right text-sm font-medium text-gray-700">Average Price</th>
+                <th className="px-4 py-2 text-right text-sm font-medium text-gray-700">Current Price</th>
+                <th className="px-4 py-2 text-right text-sm font-medium text-gray-700">Instrument Token</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {positions.map((pos, idx) => (
+                <tr key={idx} className="hover:bg-gray-50">
+                  <td className="px-4 py-2 text-sm text-gray-800">{pos.tradingsymbol}</td>
+                  <td className="px-4 py-2 text-sm text-right text-gray-800">{pos.quantity}</td>
+                  <td className="px-4 py-2 text-sm text-right text-gray-800">₹{pos.average_price}</td>
+                  <td className="px-4 py-2 text-sm text-right text-gray-800">₹{pos.last_price}</td>
+                  <td className="px-4 py-2 text-sm text-right text-gray-800">{pos.instrument_token}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p className="text-gray-600">No existing positions</p>
+        )
       )}
+
+      <div className="mt-6 flex justify-between">
+        <Link to="/upstoxAdd" className="text-gray-500 hover:underline">← Back</Link>
+        <Link to="/" className="text-blue-500 hover:underline">Home</Link>
+      </div>
     </div>
   );
 };

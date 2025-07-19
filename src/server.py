@@ -2,12 +2,15 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from KotakTrader import KotakTrader
 from UpstoxTrader import UpstoxTrader
+from basket import Basket
 
 app = Flask(__name__)
 CORS(app)
 
 kotak_traders = []
 upstox_traders = []
+baskets = []
+_next_basket_id = 1
 
 def getTrader(name, trader_type):
     if trader_type == "kotak":
@@ -31,6 +34,9 @@ def add_account():
 
         name = data.get('name')
         trader_type = data.get('traderType')
+
+        print(name)
+        print(trader_type)
 
         if trader_type not in ["kotak", "upstox"]:
             return jsonify({"error": "Invalid trader type"}), 400
@@ -338,93 +344,156 @@ def get_open_orders():
             return jsonify({"error": "Kotak Account not found"}), 404
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-@app.route("/post-ironfly", methods = ["POST"])
-def ironfly():
+
+@app.route("/create-basket", methods=["POST"])
+def create_basket():
+    global _next_basket_id
+
+    data = request.get_json(silent=True) or {}
+    # Validate required fields
+    required = ["index", "expiry", "putStrike", "callStrike", "putDistance", "callDistance", "quantity"]
+    for field in required:
+        if field not in data:
+            return jsonify({"error": f"'{field}' is required"}), 400
+
+    # Construct the Basket instance
     try:
-        data = request.get_json(silent = True)
-        name = data.get('name')
-        index = data.get('index')
-        expiry = data.get('expiry')
-        strike = data.get('strike')
-        away = data.get('away')
-        quantity = str(data.get('quantity'))
-        amo = str(data.get('amo'))
-        enter = data.get('enter')
-
-        if not name:
-            return jsonify({"error": "Name is required"}), 400
-        if not index:
-            return jsonify({"error": "Index is required"}), 400
-        if not expiry:
-            return jsonify({"error": "Expiry is required"}), 400
-        if not strike:
-            return jsonify({"error": "Strike is required"}), 400
-        if not away:
-            return jsonify({"error": "Away is required"}), 400
-        if not amo:
-            return jsonify({"error": "AMO is required"}), 400
-        if not quantity:
-            return jsonify({"error": "Quantity is required"}), 400
-        if not enter:
-            return jsonify({"error": "Enter is required"}), 400
-
-        trader_kotak = getTrader(name, "kotak")
-        
-        if trader_kotak:
-            exchangeSegment = "nse_fo"
-            
-            if index == "SENSEX":
-                exchangeSegment = "bse_fo"
-            transactionType = "B"
-            
-            if enter == "YES":
-                transactionType = "S"
-            
-            trader_kotak.placeOrder(exchangeSegment = exchangeSegment, price = "0", quantity = quantity, tradingSymbol = index + expiry + strike + "PE",
-                                    transactionType = transactionType, orderType = "MKT", amo = amo)
-            
-            trader_kotak.placeOrder(exchangeSegment = exchangeSegment, price = "0", quantity = quantity, tradingSymbol = index + expiry + strike + "CE",
-                                    transactionType = transactionType, orderType = "MKT", amo = amo)
-            
-            if transactionType == "B":
-                transactionType = "S"
-            else:
-                transactionType = "B"
-            
-            trader_kotak.placeOrder(exchangeSegment = exchangeSegment, price = "0", quantity = quantity, 
-                                    tradingSymbol = index + expiry + str(int(strike) - int(away)) + "PE", transactionType = transactionType,
-                                      orderType = "MKT", amo = amo)
-
-            trader_kotak.placeOrder(exchangeSegment = exchangeSegment, price = "0", quantity = quantity, 
-                                    tradingSymbol = index + expiry + str(int(strike) + int(away)) + "CE", transactionType = transactionType,
-                                      orderType = "MKT", amo = amo)
-
-        trader_upstox = getTrader(name, "upstox")
-
-        if trader_upstox:
-            transactionType = "BUY"
-            if enter == "YES":
-                transactionType = "SELL"
-            
-            trader_upstox.placeOrder(index + expiry + strike + "PE", quantity, "0", transactionType, "MKT", "0", is_amo = amo)
-            trader_upstox.placeOrder(index + expiry + strike + "CE", quantity, "0", transactionType, "MKT", "0", is_amo = amo)
-            
-            if transactionType == "BUY":
-                transactionType = "SELL"
-            else:
-                transactionType = "BUY"
-
-            is_amo = True
-            if amo == "NO":
-                is_amo = False
-            
-            trader_upstox.placeOrder(index + expiry + str(int(strike) - int(away)) + "PE", quantity, "0", transactionType, "MKT", "0", is_amo = is_amo)
-            trader_upstox.placeOrder(index + expiry + str(int(strike) + int(away)) + "CE", quantity, "0", transactionType, "MKT", "0", is_amo = is_amo)
-
-        return jsonify({"message": "Ironfly placed successfully"}), 200
-        
+        b = Basket(
+            index       = data["index"],
+            putStrike   = int(data["putStrike"]),
+            callStrike  = int(data["callStrike"]),
+            putDistance = int(data["putDistance"]),
+            callDistance= int(data["callDistance"]),
+            expiry      = data["expiry"],
+            quantity    = int(data["quantity"]),
+        )
     except Exception as e:
-        return jsonify({"Invalid order placing": str(e)}), 500
+        return jsonify({"error": f"Invalid parameter: {e}"}), 400
+
+    # Save it with a unique ID
+    basket_entry = {
+        "id":       _next_basket_id,
+        "instance": b,
+        "params":   {
+            "index": data["index"],
+            "expiry": data["expiry"],
+            "putStrike": data["putStrike"],
+            "callStrike": data["callStrike"],
+            "putDistance": data["putDistance"],
+            "callDistance": data["callDistance"],
+            "quantity": data["quantity"]
+        }
+    }
+
+    baskets.append(basket_entry)
+    _next_basket_id += 1
+
+    return jsonify({
+        "message":  "Basket saved",
+        "basketId": basket_entry["id"]
+    }), 200
+
+
+@app.route("/get-baskets", methods = ["POST"])
+def get_baskets():
+    simple = [
+        { "id": e["id"], **e["params"] }
+        for e in baskets
+    ]
+    return jsonify({ "baskets": simple }), 200
+
+@app.route("/delete-basket", methods = ["POST"])
+def delete_basket():
+    data = request.get_json(silent=True) or {}
+    bid = data.get("basketId")
+    global baskets
+    before = len(baskets)
+    baskets = [b for b in baskets if b["id"] != bid]
+    if len(baskets) == before:
+        return jsonify({"error": "Basket not found"}), 404
+    return jsonify({"message": "Basket deleted successfully"}), 200
+
+@app.route("/update-basket", methods = ["POST"])
+def update_basket():
+    data = request.get_json(silent=True) or {}
+    required = ["basketId", "index", "expiry", "putStrike", "callStrike", "putDistance", "callDistance", "quantity"]
+    for field in required:
+        if field not in data:
+            return jsonify({"error": f"'{field}' is required"}), 400
+
+    # Find the basket
+    entry = next((e for e in baskets if e["id"] == data["basketId"]), None)
+    if not entry:
+        return jsonify({"error": "Basket not found"}), 404
+
+    # update params
+    params = entry["params"]
+    for key in required:
+        if key != "basketId":
+            params[key] = data[key]
+
+    # re-instantiate the Basket instance with updated params
+    entry["instance"] = Basket(
+        index       = params["index"],
+        putStrike   = int(params["putStrike"]),
+        callStrike  = int(params["callStrike"]),
+        putDistance = int(params["putDistance"]),
+        callDistance= int(params["callDistance"]),
+        expiry      = params["expiry"],
+        quantity    = int(params["quantity"])
+    )
+
+    return jsonify({"message": "Basket updated"}), 200
+
+@app.route("/execute-basket", methods = ["POST"])
+def execute_basket():
+    data = request.get_json(silent=True) or {}
+    bid      = data.get("basketId")
+    names    = data.get("accounts", [])
+    conf     = data.get("confirmations", {})
+
+    # Find the basket
+    entry = next((e for e in baskets if e["id"] == bid), None)
+    if not entry:
+        return jsonify({"error": "Basket not found"}), 404
+    basket: Basket = entry["instance"]
+
+    # Look up traders
+    kotaks   = [getTrader(n, "kotak")   for n in names]
+    upstoxes = [getTrader(n, "upstox") for n in names]
+    kotaks   = [t for t in kotaks   if t]
+    upstoxes = [t for t in upstoxes if t]
+
+    executed = []
+
+    # Helper to execute a single leg
+    def do_leg(symbol, txn):
+        # Kotak
+        for t in kotaks:
+            t.placeOrder(exchangeSegment=basket.exchangeSegment,price="0",quantity=basket.quantity,tradingSymbol=symbol,
+             transactionType=txn,orderType="MKT")
+            executed.append(f"Kotak {symbol} {txn}")
+
+        # Upstox
+        for t in upstoxes:
+            t.placeOrder(tradingSymbol=symbol,quantity=basket.quantity,price=0,transaction_type="BUY" if txn=="B" else "SELL",
+            order_type="MARKET",trigger_price=0,is_amo=False)
+            executed.append(f"Upstox {symbol} {txn}")
+
+    ph = f"{basket.index}{basket.expiry}{basket.putHedge}PE"
+    pm = f"{basket.index}{basket.expiry}{basket.putStrike}PE"
+    ch = f"{basket.index}{basket.expiry}{basket.callHedge}CE"
+    cm = f"{basket.index}{basket.expiry}{basket.callStrike}CE"
+
+    try:
+        if conf.get("putHedge"):  do_leg(ph, "B")
+        if conf.get("putMain"):   do_leg(pm, "S")
+        if conf.get("callHedge"): do_leg(ch, "B")
+        if conf.get("callMain"):  do_leg(cm, "S")
+        return jsonify({"executed": executed}), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Execution failed: {e}"}), 500
 
 if __name__ == "__main__":
     app.run(debug = False, port = 5000)

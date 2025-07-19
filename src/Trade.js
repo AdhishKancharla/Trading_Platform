@@ -1,298 +1,194 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { Link } from "react-router-dom";
+// Trade.js
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 const Trade = () => {
-  const [index, setIndex] = useState("");
-  const [strike, setStrike] = useState("");
-  const [expiry, setExpiry] = useState("");
-  const [option, setOption] = useState("");
-  const [exchangeSegment, setExchangeSegment] = useState("");
-  const [quantity, setQuantity] = useState("");
-  const [price, setPrice] = useState("");
-  const [transactionType, setTransactionType] = useState("");
-  const [orderType, setOrderType] = useState("");
-  const [triggerPrice, setTriggerPrice] = useState("");
+  const [index, setIndex] = useState('');
+  const [strike, setStrike] = useState('');
+  const [expiry, setExpiry] = useState('');
+  const [optionType, setOptionType] = useState('');
+  const [quantity, setQuantity] = useState('');
+  const [price, setPrice] = useState('');
+  const [transactionType, setTransactionType] = useState('');
+  const [orderType, setOrderType] = useState('');
+  const [triggerPrice, setTriggerPrice] = useState('');
   const [afterMarketOrder, setAfterMarketOrder] = useState(false);
-  const [message, setMessage] = useState("");
   const [accounts, setAccounts] = useState([]);
   const [selectedAccounts, setSelectedAccounts] = useState([]);
+  const [message, setMessage] = useState('');
+  const [loadingAccounts, setLoadingAccounts] = useState(true);
+  const [accountsError, setAccountsError] = useState('');
 
   useEffect(() => {
-    fetchAccounts();
-  }
-  , []);
+    const fetch = async () => {
+      setLoadingAccounts(true);
+      try {
+        const res = await axios.post('/get-all-accounts', {});
+        setAccounts(res.data.accounts || []);
+      } catch {
+        setAccountsError('Failed to load accounts.');
+      } finally {
+        setLoadingAccounts(false);
+      }
+    };
+    fetch();
+  }, []);
 
-  const fetchAccounts = async () => {
-    try {
-      const response = await axios.post("https://super-sincerely-buffalo.ngrok-free.app/get-all-accounts");
-      setAccounts(response.data.accounts);
-      console.log("Accounts fetched:", response.data.accounts);
-    } catch (error) {
-      console.error("Error fetching accounts:", error);
-    }
-  };
-
-  const handleAccountSelection = (account) => {
-    setSelectedAccounts((prev) =>
-      prev.includes(account) ? prev.filter((a) => a !== account) : [...prev, account]
+  const toggleAcct = acct => {
+    setSelectedAccounts(prev =>
+      prev.includes(acct) ? prev.filter(a => a !== acct) : [...prev, acct]
     );
   };
 
-  const handleTradeSubmit = async (e) => {
+  const submit = async e => {
     e.preventDefault();
-    for (const trader of selectedAccounts) {
-      try{
-        if (!(orderType === "SL" || orderType === "SL-M")){
-          setTriggerPrice("0");
-        }
-        console.log("Placing order for ", trader.name);
-        console.log("Trader Type: ", trader.traderType);
-        console.log("Exchange Segment: ", exchangeSegment);
-        console.log("Index: ", index);
-        console.log("Option: ", option);
-        console.log("Strike Price: ", strike);
-        console.log("Expiry Date: ", expiry);
-        console.log("Quantity: ", quantity);
-        console.log("Price: ", price);
-        console.log("Transaction Type: ", transactionType);
-        console.log("Order Type: ", orderType);
-        console.log("Trigger Price: ", triggerPrice);
-        console.log("After Market Order: ", afterMarketOrder);
-        console.log("Trader Name: ", trader.name);
-        await axios.post("https://super-sincerely-buffalo.ngrok-free.app/place-order", 
-          {
-            name: trader.name,
-            exchangeSegment: exchangeSegment,
-            index: index,
-            option: option,
-            strike: strike,
-            expiry: expiry,
-            quantity: quantity,
-            price: price,
-            transactionType: transactionType,
-            orderType: orderType,
-            triggerPrice: triggerPrice,
-            amo: afterMarketOrder,
-          }
-        );
-        console.log("Order placed successfully for ", trader.name);
-      }
-      catch(error) {
-        console.error("Error placing order for ", trader.name, error);
-        setMessage(`Error placing order for ${trader.name}. Please try again.`);
-        return;
+    if (!selectedAccounts.length) return setMessage('Select an account.');
+    for (const t of selectedAccounts) {
+      try {
+        const tp = ['SL', 'SL-M'].includes(orderType) ? triggerPrice : '0';
+        const pr = orderType === 'LIMIT' ? price : '0';
+        await axios.post('/place-order', {
+          name: t.name,
+          exchangeSegment: t.traderType === 'kotak' ? 'kotak_segment' : 'nse_fo',
+          index,
+          option: optionType,
+          strike,
+          expiry,
+          quantity,
+          price: pr,
+          transactionType,
+          orderType,
+          triggerPrice: tp,
+          amo: afterMarketOrder
+        });
+      } catch {
+        return setMessage(`Error for ${t.name}`);
       }
     }
-    setMessage("All trade orders placed successfully!");
+    setMessage('Orders placed!');
   };
 
   return (
-    <div className="p-4">
-      <h1 className="text-4xl font-bold mb-4">Trade Page</h1>
+    <div className="p-4 max-w-xl mx-auto bg-white rounded-lg shadow">
+      <h2 className="text-xl font-bold mb-1">Place a Trade</h2>
+      <p className="text-sm text-gray-600 mb-4">Choose options & accounts.</p>
 
-      <form onSubmit = {handleTradeSubmit} className="space-y-4">
-        <div>
-          <label className = "block mb-1 font-semibold">Index:</label>
-          <select
-            value = {index}
-            onChange = {(e) => setIndex(e.target.value)}
-            className = "p-2 border rounded w-full"
-            required
-          >
-            <option value = "">Select index</option>
-            <option value = "NIFTY">Nifty</option>
-            <option value = "BANKNIFTY">Banknifty</option>
-            <option value = "SENSEX">Sensex</option>
-          </select>
-        </div>
-        <div>
-          <label className = "block mb-1 font-semibold">Strike Price:</label>
-          <input
-            type = "number"
-            value = {strike}
-            onChange = {(e) => setStrike(e.target.value)}
-            className = "p-2 border rounded w-full"
-            placeholder = "Enter strike price"
-            required
-          />
-        </div>
-        <div>
-          <label className = "block mb-1 font-semibold">Option:</label>
-          <select
-            value = {option}
-            onChange = {(e) => setOption(e.target.value)}
-            className = "p-2 border rounded w-full"
-            required
-          >
-            <option value = "">Select option</option>
-            <option value = "CE">Call Option</option>
-            <option value = "PE">Put Option</option>
-          </select>
-        </div>
-        {index === "NIFTY" && (
-          <div>
-            <label className = "block mb-1 font-semibold">Expiry Date:</label>
-            <select
-              value = {expiry}
-              onChange = {(e) => setExpiry(e.target.value)}
-              className = "p-2 border rounded w-full"
-              required
-            >
-              <option value = "">Select expiry date</option>
-              <option value = "25417">17th April</option>
-              <option value = "25APR">24th April</option>
-              <option value = "25430">30th April</option>
-            </select>
-          </div>
-        )}
-        {index === "BANKNIFTY" && (
+      {accountsError && <p className="text-red-600 text-sm mb-2">{accountsError}</p>}
+      {loadingAccounts ? (
+        <p className="text-sm">Loading accounts...</p>
+      ) : (
+        <form onSubmit={submit} className="space-y-2 text-sm">
+          {/* Index & Type */}
+          <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className = "block mb-1 font-semibold">Expiry Date:</label>
-              <select
-                value = {expiry}
-                onChange = {(e) => setExpiry(e.target.value)}
-                className = "p-2 border rounded w-full"
-                required
-              >
-                <option value = "">Select expiry date</option>
-                <option value = "25APR">24th April</option>
+              <label className="block mb-1 font-semibold">Index</label>
+              <select value={index} onChange={e => { setIndex(e.target.value); setExpiry(''); }} className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" required>
+                <option value="">Select</option><option value="NIFTY">Nifty</option><option value="BANKNIFTY">Banknifty</option><option value="SENSEX">Sensex</option>
               </select>
             </div>
-          )}
-        {index === "SENSEX" && (
             <div>
-              <label className = "block mb-1 font-semibold">Expiry Date:</label>
-              <select
-                value = {expiry}
-                onChange = {(e) => setExpiry(e.target.value)}
-                className = "p-2 border rounded w-full"
-                required
-              >
-                <option value = "">Select expiry date</option>
-                <option value = "25415">15th April</option>
-                <option value = "25422">22nd April</option>
-                <option value = "25APR">29th April</option>
+              <label className="block mb-1 font-semibold">Option</label>
+              <select value={optionType} onChange={e => setOptionType(e.target.value)} className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" required>
+                <option value="">Select</option><option value="CE">Call</option><option value="PE">Put</option>
               </select>
             </div>
-          )}
-        <div>
-          <label className = "block mb-1 font-semibold">Quantity:</label>
-          <input
-            type = "number"
-            value = {quantity}
-            onChange = {(e) => setQuantity(e.target.value)}
-            className = "p-2 border rounded w-full"
-            placeholder = "Enter quantity"
-            required
-          />
-        </div>
-        <div>
-          <label className = "block mb-1 font-semibold">Price:</label>
-          <input
-            type = "number"
-            step = "0.01"
-            value = {price}
-            onChange = {(e) => setPrice(e.target.value)}
-            className = "p-2 border rounded w-full"
-            placeholder = "Enter price"
-            required
-          />
-        </div>
-        <div>
-          <label className = "block mb-1 font-semibold">Transaction Type:</label>
-          <select
-            value = {transactionType}
-            onChange = {(e) => setTransactionType(e.target.value)}
-            className="p-2 border rounded w-full"
-            required
-          >
-            <option value = "">Select transaction type</option>
-            <option value = "BUY">BUY</option>
-            <option value = "SELL">SELL</option>
-          </select>
-        </div>
-        <div>
-          <label className = "block mb-1 font-semibold">After Market Order:</label>
-          <select
-            value = {afterMarketOrder}
-            onChange = {(e) => setAfterMarketOrder(e.target.value)}
-            className="p-2 border rounded w-full"
-            required
-          >
-            <option value = "">Select whether or not this is an after market order: remember to select NO during trading hours</option>
-            <option value = "YES">YES</option>
-            <option value = "NO">NO</option>
-          </select>
-        </div>
-        <div>
-          <label className = "block mb-1 font-semibold">Exchange Segment:</label>
-          <select
-            value = {exchangeSegment}
-            onChange = {(e) => setExchangeSegment(e.target.value)}
-            className = "p-2 border rounded w-full"
-            required
-          >
-            <option value = "">Select exchange segment</option>
-            <option value = "nse_fo">NSE</option>
-            <option value = "bse_fo">BSE</option>
-            </select>
           </div>
-        <div>
-          <label className = "block mb-1 font-semibold">Order Type:</label>
-          <select
-            value = {orderType}
-            onChange = {(e) => setOrderType(e.target.value)}
-            className = "p-2 border rounded w-full"
-            required
-          >
-            <option value = "">Select order type</option>
-            <option value = "LIMIT">Limit</option>
-            <option value = "MARKET">Market</option>
-            <option value = "SL">Stop Loss Limit</option>
-            <option value = "SL-M">Stop Loss Market</option>
-          </select>
-        </div>
-        {(orderType === "SL" || orderType === "SL-M") && (
-          <div>
-            <label className = "block mb-1 font-semibold">Trigger Price:</label>
-            <input
-              type = "number"
-              step = "0.01"
-              value = {triggerPrice}
-              onChange = {(e) => setTriggerPrice(e.target.value)}
-              className = "p-2 border rounded w-full"
-              placeholder = "Enter trigger price"
-              required
-            />
+
+          {/* Strike & Expiry */}
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block mb-1 font-semibold">Strike</label>
+              <input type="number" value={strike} onChange={e => setStrike(e.target.value)} placeholder="Strike" className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" required />
+            </div>
+            <div>
+              <label className="block mb-1 font-semibold">Expiry</label>
+              {index === 'NIFTY' && (
+                <select value={expiry} onChange={e => setExpiry(e.target.value)} className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" required>
+                  <option value="">Date</option><option value="25724">24th July</option><option value="25JUL">31st July</option><option value="25807">7th August</option>
+                </select>
+              )}
+              {index === 'BANKNIFTY' && (
+                <select value={expiry} onChange={e => setExpiry(e.target.value)} className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" required>
+                  <option value="">Date</option><option value="25JUL">31st July</option><option value="25AUG">28th August</option>
+                </select>
+              )}
+              {index === 'SENSEX' && (
+                <select value={expiry} onChange={e => setExpiry(e.target.value)} className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" required>
+                  <option value="">Date</option><option value="25722">22nd July</option><option value="25JUL">29th July</option><option value="25805">5th August</option>
+                </select>
+              )}
+            </div>
           </div>
-        )}
-        <div className = "mb-4">
-            <h3 className = "block mb-2 font-semibold">Select Accounts:</h3>
-            {accounts.map((account, index) => (
-              <div key = {index} className="flex items-center mb-2">
-                <input
-                  type = "checkbox"
-                  id = {`account-${index}`}
-                  value = {account.name}
-                  checked = {selectedAccounts.includes(account)}
-                  onChange = {() => handleAccountSelection(account)}
-                  className = "mr-2"
-                />
-                <label htmlFor = {`account-${index}`} > {`${account.name} (${account.traderType})`}</label>
+
+          {/* Quantity */}
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block mb-1 font-semibold">Qty</label>
+              <input type="number" value={quantity} onChange={e => setQuantity(e.target.value)} placeholder="Qty" className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" required />
+            </div>
+
+            {/* Price - shown only for LIMIT orders */}
+            {orderType === 'LIMIT' ? (
+              <div>
+                <label className="block mb-1 font-semibold">Price</label>
+                <input type="number" step="0.01" value={price} onChange={e => setPrice(e.target.value)} placeholder="Price" className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" required />
               </div>
-            ))}
+            ) : <div />}
           </div>
-        <button type = "submit" className="p-2 bg-green-500 text-white rounded">
-          Submit Trade
-        </button>
-      </form>
-      {message && (<div className="mt-4 p-2 bg-gray-200 rounded">{message}</div>)}
-      <div className="mb-4">
-        <Link to="/" className="p-2 bg-blue-500 text-white rounded">
-          Go to Home
-        </Link>
-      </div>
+
+          {/* Trans & Order */}
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block mb-1 font-semibold">Trans</label>
+              <select value={transactionType} onChange={e => setTransactionType(e.target.value)} className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" required>
+                <option value="">Type</option><option value="BUY">Buy</option><option value="SELL">Sell</option>
+              </select>
+            </div>
+            <div>
+              <label className="block mb-1 font-semibold">Order</label>
+              <select value={orderType} onChange={e => setOrderType(e.target.value)} className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" required>
+                <option value="">Order</option><option value="LIMIT">Limit</option><option value="MARKET">Market</option><option value="SL">SL</option><option value="SL-M">SL-M</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Trigger if needed */}
+          {['SL', 'SL-M'].includes(orderType) && (
+            <div>
+              <label className="block mb-1 font-semibold">Trigger</label>
+              <input type="number" step="0.01" value={triggerPrice} onChange={e => setTriggerPrice(e.target.value)} placeholder="Trigger" className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" required />
+            </div>
+          )}
+
+          {/* AMO */}
+          <div>
+            <label className="block mb-1 font-semibold">AMO</label>
+            <select value={afterMarketOrder} onChange={e => setAfterMarketOrder(e.target.value === 'true')} className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" required>
+              <option value="">AMO?</option><option value="true">Y</option><option value="false">N</option>
+            </select>
+          </div>
+
+          {/* Accounts */}
+          <div>
+            <label className="block mb-1 font-semibold">Accounts</label>
+            <div className="grid grid-cols-2 gap-1">
+              {accounts.map((a, i) => (
+                <label key={i} className="flex items-center space-x-1 text-xs">
+                  <input type="checkbox" checked={selectedAccounts.includes(a)} onChange={() => toggleAcct(a)} className="h-4 w-4" />
+                  <span>{a.name}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <button type="submit" className="w-full py-2 bg-green-500 hover:bg-green-600 text-white text-sm rounded-lg transition">Submit</button>
+          {message && <p className="mt-2 text-center text-sm text-indigo-700">{message}</p>}
+          <div className="mt-2 text-sm flex justify-between">
+            <Link to="/" className="text-gray-500">← Home</Link>
+          </div>
+        </form>
+      )}
     </div>
   );
 };

@@ -10,6 +10,8 @@ import UpstoxAdd from './UpstoxAddAccount'
 import UpstoxGetAccount from "./UpstoxGetAccount";
 import UpstoxPositions from "./UpstoxPositions";
 import ModifyOrder from "./ModifyOrder";
+import Ironfly from "./IronFly";
+import SavedBaskets from "./SavedBaskets";
 
 const App = () => {
   return (
@@ -26,6 +28,8 @@ const App = () => {
         <Route path = "/trade" element={<Trade />} />
         <Route path = "/modifyOrder" element={<ModifyOrder />} />.
         <Route path = "/cancelOrder" element={<ModifyOrder />} />
+        <Route path = "/Ironfly" element={<Ironfly />} />
+        <Route path = "/baskets" element={<SavedBaskets />} />
       </Routes>
     </Router>
   );

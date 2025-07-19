@@ -50,6 +50,31 @@ data_place_order = {
     "triggerPrice": 0,
     "amo": "YES"
 }
+data_create_basket = {
+    "index": "NIFTY",
+    "putStrike": 25400,
+    "callStrike": 26000,
+    "putDistance": 100,
+    "callDistance": 200,
+    "expiry": "2023-10-26",
+    "quantity": 75
+}
+data_get_basket = {}
+data_execute_basket = {
+    "basketId": "1",
+    "accounts": ["padma", "prasad"],
+    "side": "enterBoth", #OR exitBoth
+}
+
+#response = requests.post(url + "create-basket", json = data_create_basket).json()
+#print(response)
+
+#response = requests.get(url + "get-baskets", json = data_get_basket).json()
+#print(response)
+
+#response = requests.post(url + "execute-basket", json = data_execute_basket).json()
+#print(response)
+
 #response = requests.post(url + "add-account", json = data_upstox_init).json()
 #print(response)
 #response = requests.post(url + "get-account-details", json = data_get_upstox_details).json()

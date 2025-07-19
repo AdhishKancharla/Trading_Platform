@@ -136,10 +136,7 @@ export default function SavedBaskets() {
                       value={form.expiry}
                       onChange={e => setForm(f => ({ ...f, expiry: e.target.value }))}
                     >
-                      <option value="">Select expiry</option>
-                      <option value="25417">17th April</option>
-                      <option value="25APR">24th April</option>
-                      <option value="25430">30th April</option>
+                      <option value="">Date</option><option value="25724">24th July</option><option value="25JUL">31st July</option><option value="25807">7th August</option>
                     </select>
                   </div>
                 )}
@@ -151,8 +148,7 @@ export default function SavedBaskets() {
                       value={form.expiry}
                       onChange={e => setForm(f => ({ ...f, expiry: e.target.value }))}
                     >
-                      <option value="">Select expiry</option>
-                      <option value="25APR">24th April</option>
+                      <option value="">Date</option><option value="25JUL">31st July</option><option value="25AUG">28th August</option>
                     </select>
                   </div>
                 )}
@@ -164,10 +160,7 @@ export default function SavedBaskets() {
                       value={form.expiry}
                       onChange={e => setForm(f => ({ ...f, expiry: e.target.value }))}
                     >
-                      <option value="">Select expiry</option>
-                      <option value="25415">15th April</option>
-                      <option value="25422">22nd April</option>
-                      <option value="25APR">29th April</option>
+                      <option value="">Date</option><option value="25722">22nd July</option><option value="25JUL">29th July</option><option value="25805">5th August</option>
                     </select>
                   </div>
                 )}

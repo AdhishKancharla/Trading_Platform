@@ -4,7 +4,6 @@ import {
   PlusCircle,
   LogIn,
   ShieldCheck,
-  User,
   BarChart2,
   ShoppingCart,
   Edit,

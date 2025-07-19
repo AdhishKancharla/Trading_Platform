@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState} from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 
@@ -13,24 +13,7 @@ export default function IronFly() {
   const [putDistance, setPutDistance] = useState("");
   const [callDistance, setCallDistance] = useState("");
   const [quantity, setQuantity]       = useState("");
-
-  // Support state
-  const [accounts, setAccounts]       = useState([]);
-  const [baskets, setBaskets]         = useState([]);
   const [message, setMessage]         = useState("");
-
-  // Fetch accounts & existing baskets
-  useEffect(() => {
-    axios
-      .post(`${API_BASE}/get-all-accounts`, {})
-      .then(r => setAccounts(r.data.accounts))
-      .catch(console.error);
-
-    axios
-      .post(`${API_BASE}/get-baskets`)
-      .then(r => setBaskets(r.data.baskets))
-      .catch(console.error);
-  }, []);
 
   // Save-only handler
   const handleSave = async e => {
@@ -46,9 +29,6 @@ export default function IronFly() {
         quantity
       });
       setMessage(`Basket saved! ID=${resp.data.basketId}`);
-      // reload list
-      const b = await axios.post(`${API_BASE}/get-baskets`);
-      setBaskets(b.data.baskets);
     } catch (err) {
       console.error(err);
       setMessage("Error saving basket");

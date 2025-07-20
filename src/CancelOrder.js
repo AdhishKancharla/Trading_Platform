@@ -33,9 +33,6 @@ const CancelOrder = () => {
     e.preventDefault();
     for (const trader of selectedAccounts) {
       try{
-        if (!(orderType === "SL" || orderType === "SL-M")){
-          setTriggerPrice("0");
-        }
         console.log("Cancelling order for ", trader.name);
         console.log("Order ID: ", order_id);
         await axios.post("https://super-sincerely-buffalo.ngrok-free.app/cancel-order", 

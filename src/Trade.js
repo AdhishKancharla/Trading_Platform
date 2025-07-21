@@ -50,7 +50,7 @@ const Trade = () => {
         const pr = orderType === 'LIMIT' ? price : '0';
         await axios.post('/place-order', {
           name: t.name,
-          exchangeSegment: index == "SENSEX" ? 'bse_fo' : 'nse_fo',
+          exchangeSegment: index === "SENSEX" ? 'bse_fo' : 'nse_fo',
           index: index, option: optionType, strike: strike, expiry: expiry, quantity: quantity, price: pr,
           transactionType: transactionType, orderType: orderType, triggerPrice: tp, amo: afterMarketOrder
         });

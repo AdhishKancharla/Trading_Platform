@@ -50,17 +50,9 @@ const Trade = () => {
         const pr = orderType === 'LIMIT' ? price : '0';
         await axios.post('/place-order', {
           name: t.name,
-          exchangeSegment: t.traderType === 'kotak' ? 'kotak_segment' : 'nse_fo',
-          index,
-          option: optionType,
-          strike,
-          expiry,
-          quantity,
-          price: pr,
-          transactionType,
-          orderType,
-          triggerPrice: tp,
-          amo: afterMarketOrder
+          exchangeSegment: index == "SENSEX" ? 'bse_fo' : 'nse_fo',
+          index: index, option: optionType, strike: strike, expiry: expiry, quantity: quantity, price: pr,
+          transactionType: transactionType, orderType: orderType, triggerPrice: tp, amo: afterMarketOrder
         });
       } catch {
         return setMessage(`Error for ${t.name}`);

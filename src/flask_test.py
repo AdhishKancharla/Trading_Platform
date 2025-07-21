@@ -41,14 +41,17 @@ data_get_upstox_positions = {
 }
 data_place_order = {
     "name": "padma",
-    "exchangeSegment": "NSE",
-    "tradingsymbol": "NIFTY2540323100CE",
-    "quantity": 75,
-    "price": 1,
+    "exchangeSegment": "bse_fo",
+    "index": "SENSEX",
+    "strike": "81000",
+    "expiry": "25722",
+    "option": "PE",
+    "quantity": 200,
+    "price": 48,
     "transactionType": "BUY",
     "orderType": "LIMIT",
     "triggerPrice": 0,
-    "amo": "YES"
+    "amo": "NO"
 }
 data_create_basket = {
     "index": "NIFTY",
@@ -99,5 +102,5 @@ data_execute_basket = {
 #response = requests.post(url + "get-positions", json = data_get_kotak_positions).json()
 #print(response)
 #data_place_order['name'] = "padma"
-#response = requests.post(url + "place-order", json = data_place_order).json()
-#print(response)
+response = requests.post(url + "place-order", json = data_place_order).json()
+print(response)

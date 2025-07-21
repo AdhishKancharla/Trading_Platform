@@ -37,7 +37,7 @@ export default function IronFly() {
 
   return (
     <div className="p-4 max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4">Create Ironfly Basket</h2>
+      <h2 className="text-2xl font-bold mb-4">Create Spread Basket</h2>
 
       <form onSubmit={handleSave} className="space-y-4">
         {/* Index */}

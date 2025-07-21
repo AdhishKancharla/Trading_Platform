@@ -230,6 +230,10 @@ def place_order():
                 transaction_type = "S"
             else:
                 return jsonify({"error": "Invalid transaction type"}), 400
+            if amo == "Y":
+                amo = "YES"
+            else:
+                amo = "NO"
             
             print("Trying to place order")
 

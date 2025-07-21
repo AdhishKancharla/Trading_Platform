@@ -280,10 +280,15 @@ export default function SavedBaskets() {
                   <p className="font-semibold">Confirm Legs</p>
                   <div className="grid grid-cols-2 gap-2 mt-2">
                     {[
-                      ["putHedge","Put Hedge"],
-                      ["putMain","Put Main"],
-                      ["callHedge","Call Hedge"],
-                      ["callMain","Call Main"]
+                      ["putHedgeEnter","Enter Put Hedge"],
+                      ["putHedgeExit","Exit Put Hedge"],
+                      ["putMainEnter","Enter Put Main"],
+                      ["putMainExit","Exit Put Main"],
+                      ["callHedgeEnter","Enter Call Hedge"],
+                      ["callHedgeExit","Exit Call Hedge"],
+                      ["callMainEnter","Enter Call Main"],
+                      ["callMainExit","Exit Call Main"]
+
                     ].map(([key,label]) => (
                       <label key={key} className="flex items-center">
                         <input

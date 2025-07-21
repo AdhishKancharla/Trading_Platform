@@ -470,34 +470,72 @@ def execute_basket():
 
     executed = []
 
-    # Helper to execute a single leg
-    def do_leg(symbol, txn):
-        # Kotak
-        for t in kotaks:
-            t.placeOrder(exchangeSegment=basket.exchangeSegment,price="0",quantity=basket.quantity,tradingSymbol=symbol,
-             transactionType=txn,orderType="MKT")
-            executed.append(f"Kotak {symbol} {txn}")
+    if conf.get("putHedgeEnter"):
+        for kotak in kotaks:
+            basket.enterPutHedge(kotak, None, True)
+            executed.append(f"Success for {kotak.name}")
+        for upstox in upstoxes:
+            basket.enterPutHedge(None, upstox, False)
+            executed.append(f"Success for {upstox.name}")
+    
+    if conf.get("putMainEnter"):
+        for kotak in kotaks:
+            basket.enterPutMain(kotak, None, True)
+            executed.append(f"Success for {kotak.name}")
+        for upstox in upstoxes:
+            basket.enterPutMain(None, upstox, False)
+            executed.append(f"Success for {upstox.name}")
 
-        # Upstox
-        for t in upstoxes:
-            t.placeOrder(tradingSymbol=symbol,quantity=basket.quantity,price=0,transaction_type="BUY" if txn=="B" else "SELL",
-            order_type="MARKET",trigger_price=0,is_amo=False)
-            executed.append(f"Upstox {symbol} {txn}")
+    if conf.get("callHedgeEnter"):
+        for kotak in kotaks:
+            basket.enterCallHedge(kotak, None, True)
+            executed.append(f"Success for {kotak.name}")
+        for upstox in upstoxes:
+            basket.enterCallHedge(None, upstox, False)
+            executed.append(f"Success for {upstox.name}")
 
-    ph = f"{basket.index}{basket.expiry}{basket.putHedge}PE"
-    pm = f"{basket.index}{basket.expiry}{basket.putStrike}PE"
-    ch = f"{basket.index}{basket.expiry}{basket.callHedge}CE"
-    cm = f"{basket.index}{basket.expiry}{basket.callStrike}CE"
+    if conf.get("callMainEnter"):
+        for kotak in kotaks:
+            basket.enterCallMain(kotak, None, True)
+            executed.append(f"Success for {kotak.name}")
+        for upstox in upstoxes:
+            basket.enterCallMain(None, upstox, False)
+            executed.append(f"Success for {upstox.name}")
 
-    try:
-        if conf.get("putHedge"):  do_leg(ph, "B")
-        if conf.get("putMain"):   do_leg(pm, "S")
-        if conf.get("callHedge"): do_leg(ch, "B")
-        if conf.get("callMain"):  do_leg(cm, "S")
-        return jsonify({"executed": executed}), 200
+    if conf.get("putHedgeExit"):
+        for kotak in kotaks:
+            basket.exitPutHedge(kotak, None, True)
+            executed.append(f"Success for {kotak.name}")
+        for upstox in upstoxes:
+            basket.exitPutHedge(None, upstox, False)
+            executed.append(f"Success for {upstox.name}")
 
-    except Exception as e:
-        return jsonify({"error": f"Execution failed: {e}"}), 500
+    if conf.get("putMainExit"):
+        for kotak in kotaks:
+            basket.exitPutMain(kotak, None, True)
+            executed.append(f"Success for {kotak.name}")
+        for upstox in upstoxes:
+            basket.exitPutMain(None, upstox, False)
+            executed.append(f"Success for {upstox.name}")
+
+    
+    if conf.get("callHedgeExit"):
+        for kotak in kotaks:
+            basket.exitCallHedge(kotak, None, True)
+            executed.append(f"Success for {kotak.name}")
+        for upstox in upstoxes:
+            basket.exitCallHedge(None, upstox, False)
+            executed.append(f"Success for {upstox.name}")
+
+    if conf.get("callMainExit"):
+        for kotak in kotaks:
+            basket.exitCallMain(kotak, None, True)
+            executed.append(f"Success for {kotak.name}")
+        for upstox in upstoxes:
+            basket.exitCallMain(None, upstox, False)
+            executed.append(f"Success for {upstox.name}")
+    
+    return jsonify({"executed": executed}), 200
 
 if __name__ == "__main__":
     app.run(debug = False, port = 5000)

@@ -17,3 +17,67 @@ class Basket:
     self.exchangeSegment = "nse_fo"
     if self.index == "SENSEX":
       self.exchangeSegment = "bse_fo"
+  
+  def enterPutHedge(self, kotak_trader, upstox_trader, type):
+    if type:
+      kotak_trader.placeOrder(exchangeSegment=self.exchangeSegment,price="0",quantity=self.quantity,
+                              tradingSymbol=f"{self.index}{self.expiry}{self.putHedge}PE", transactionType="B",orderType="MKT")
+    else:
+      upstox_trader.placeOrder(tradingSymbol=f"{self.index}{self.expiry}{self.putHedge}PE",quantity=self.quantity,
+                               price=0, transaction_type="BUY", order_type="MARKET", trigger_price=0, is_amo=True)
+      
+  def enterPutMain(self, kotak_trader, upstox_trader, type):
+    if type:
+      kotak_trader.placeOrder(exchangeSegment=self.exchangeSegment, price="0", quantity=self.quantity,
+                            tradingSymbol=f"{self.index}{self.expiry}{self.putStrike}PE", transactionType="S", orderType="MKT")
+    else:
+      upstox_trader.placeOrder(tradingSymbol=f"{self.index}{self.expiry}{self.putStrike}PE", quantity=self.quantity,
+                             price=0, transaction_type="SELL", order_type="MARKET", trigger_price=0, is_amo=True)
+
+  def enterCallHedge(self, kotak_trader, upstox_trader, type):
+    if type:
+      kotak_trader.placeOrder(exchangeSegment=self.exchangeSegment, price="0", quantity=self.quantity,
+                              tradingSymbol=f"{self.index}{self.expiry}{self.callHedge}CE", transactionType="B", orderType="MKT")
+    else:
+      upstox_trader.placeOrder(tradingSymbol=f"{self.index}{self.expiry}{self.callHedge}CE", quantity=self.quantity,
+                               price=0, transaction_type="BUY", order_type="MARKET", trigger_price=0, is_amo=True)
+
+  def enterCallMain(self, kotak_trader, upstox_trader, type):
+    if type:
+      kotak_trader.placeOrder(exchangeSegment=self.exchangeSegment, price="0", quantity=self.quantity,
+                              tradingSymbol=f"{self.index}{self.expiry}{self.callStrike}CE", transactionType="S", orderType="MKT")
+    else:
+      upstox_trader.placeOrder(tradingSymbol=f"{self.index}{self.expiry}{self.callStrike}CE", quantity=self.quantity,
+                               price=0, transaction_type="SELL", order_type="MARKET", trigger_price=0, is_amo=True)
+  
+  def exitPutHedge(self, kotak_trader, upstox_trader, type):
+    if type:
+      kotak_trader.placeOrder(exchangeSegment=self.exchangeSegment, price="0", quantity=self.quantity,
+                              tradingSymbol=f"{self.index}{self.expiry}{self.putHedge}PE", transactionType="S", orderType="MKT")
+    else:
+      upstox_trader.placeOrder(tradingSymbol=f"{self.index}{self.expiry}{self.putHedge}PE", quantity=self.quantity,
+                               price=0, transaction_type="SELL", order_type="MARKET", trigger_price=0, is_amo=True)
+  
+  def exitPutMain(self, kotak_trader, upstox_trader, type):
+    if type:
+      kotak_trader.placeOrder(exchangeSegment=self.exchangeSegment, price="0", quantity=self.quantity,
+                              tradingSymbol=f"{self.index}{self.expiry}{self.putStrike}PE", transactionType="B", orderType="MKT")
+    else:
+      upstox_trader.placeOrder(tradingSymbol=f"{self.index}{self.expiry}{self.putStrike}PE", quantity=self.quantity,
+                               price=0, transaction_type="BUY", order_type="MARKET", trigger_price=0, is_amo=True)
+  
+  def exitCallHedge(self, kotak_trader, upstox_trader, type):
+    if type:
+      kotak_trader.placeOrder(exchangeSegment=self.exchangeSegment, price="0", quantity=self.quantity,
+                              tradingSymbol=f"{self.index}{self.expiry}{self.callHedge}CE", transactionType="S", orderType="MKT")
+    else:
+      upstox_trader.placeOrder(tradingSymbol=f"{self.index}{self.expiry}{self.callHedge}CE", quantity=self.quantity,
+                               price=0, transaction_type="SELL", order_type="MARKET", trigger_price=0, is_amo=True)
+  
+  def exitCallMain(self, kotak_trader, upstox_trader, type):
+    if type:
+      kotak_trader.placeOrder(exchangeSegment=self.exchangeSegment, price="0", quantity=self.quantity,
+                              tradingSymbol=f"{self.index}{self.expiry}{self.callStrike}CE", transactionType="B", orderType="MKT")
+    else:
+      upstox_trader.placeOrder(tradingSymbol=f"{self.index}{self.expiry}{self.callStrike}CE", quantity=self.quantity,
+                               price=0, transaction_type="BUY", order_type="MARKET", trigger_price=0, is_amo=True)
